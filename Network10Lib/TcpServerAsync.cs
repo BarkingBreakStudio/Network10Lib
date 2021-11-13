@@ -62,16 +62,15 @@ public class TcpServerAsync
         {
             while (true)
             {
-                int readlength = await client.GetStream().ReadAsync(buffer, 0, buffer.Length, cts.Token).ConfigureAwait(false);
-                if (readlength > 0)
+                await client.GetStream().ReadUntilLengthAsync(buffer, 4, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
+                int dataLength = BitConverter.ToInt32(buffer);
+                if (buffer.Length < dataLength)
                 {
-                    MessageReceived?.Invoke(this, clientNr, client, new UTF8Encoding().GetString(buffer,0, readlength));
-                    await client.GetStream().WriteAsync(buffer, 0, readlength).ConfigureAwait(false);
+                    buffer = new byte[dataLength];
                 }
-                else
-                {
-                    break;
-                }
+                await client.GetStream().ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
+                MessageReceived?.Invoke(this, clientNr, client, new UTF8Encoding().GetString(buffer, 0, dataLength));
+                await client.GetStream().WriteAsync(buffer, 0, dataLength).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException){}

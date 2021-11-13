@@ -19,6 +19,8 @@ public class TcpClientAsync
     CancellationTokenSource cts = new CancellationTokenSource();
     Task? tRead;
 
+    private static UTF8Encoding encoding = new UTF8Encoding();
+
     public async Task Connect()
     {
         if (client is null)
@@ -53,14 +55,19 @@ public class TcpClientAsync
     public async Task ReadAsync(TcpClient client)
     {
         byte[] buffer = new byte[1024];
-        UTF8Encoding encoding = new UTF8Encoding();
       
         try
         {
-            int length;
-            while ((length = await client.GetStream().ReadAsync(buffer, 0, buffer.Length, cts.Token).ConfigureAwait(false)) > 0)
+            while (true)
             {
-                MessageReceived?.Invoke(this, encoding.GetString(buffer, 0, length));
+                await client.GetStream().ReadUntilLengthAsync(buffer, 4, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
+                int dataLength = BitConverter.ToInt32(buffer);
+                if (buffer.Length < dataLength)
+                {
+                    buffer = new byte[dataLength];
+                }
+                await client.GetStream().ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
+                MessageReceived?.Invoke(this, encoding.GetString(buffer, 0, dataLength));                
             }
         }
         catch (OperationCanceledException) { }
@@ -70,8 +77,9 @@ public class TcpClientAsync
     {
         if (client is not null)
         {
-            UTF8Encoding encoding = new UTF8Encoding();
-            await client.GetStream().WriteAsync(encoding.GetBytes(text)).ConfigureAwait(false);
+            byte[] buffer = encoding.GetBytes(text);
+            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+            await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
         }
     }
 
@@ -79,7 +87,7 @@ public class TcpClientAsync
     {
         if (client is not null)
         {
-            UTF8Encoding encoding = new UTF8Encoding();
+            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
             await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
         }
     }
