@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -44,6 +45,7 @@ namespace Network10Lib
 
             TcpServerAsync server = new TcpServerAsync();
             server.Message2Received += ServerReceivedMessage;
+            server.ClientDisconnected += ServerLostClient;
             connector = server;
             await connector.Connect().ConfigureAwait(false);
             myAdr = 0;
@@ -59,6 +61,7 @@ namespace Network10Lib
 
             TcpServerAsync server = new TcpServerAsync { Port = Port };
             server.Message2Received += ServerReceivedMessage;
+            server.ClientDisconnected += ServerLostClient;
             connector = server;
             await connector.Connect().ConfigureAwait(false);
             myAdr = 0;
@@ -74,6 +77,7 @@ namespace Network10Lib
 
             TcpServerAsync server = new TcpServerAsync { IPAddr = IpAddr, Port = Port };
             server.Message2Received += ServerReceivedMessage;
+            server.ClientDisconnected += ServerLostClient;
             connector = server;
             await connector.Connect().ConfigureAwait(false);
             myAdr = 0;
@@ -92,6 +96,7 @@ namespace Network10Lib
             IsServer = false;
             TcpClientAsync client  = new TcpClientAsync();
             client.Message2Received += ClientReceivedMessage;
+            client.Disconnected += ClientDisconnected;
             connector = client;
             await connector.Connect().ConfigureAwait(false);
             await SendClientHandshake().ConfigureAwait(false);
@@ -104,7 +109,10 @@ namespace Network10Lib
 
             myAdr = -1;
             IsServer = false;
-            connector = new TcpClientAsync { Port = Port };
+            TcpClientAsync client = new TcpClientAsync { Port = Port };
+            client.Message2Received += ClientReceivedMessage;
+            client.Disconnected += ClientDisconnected;
+            connector = client;
             await connector.Connect().ConfigureAwait(false);
             await SendClientHandshake().ConfigureAwait(false);
         }
@@ -116,7 +124,10 @@ namespace Network10Lib
 
             myAdr = -1;
             IsServer = false;
-            connector = new TcpClientAsync { IPAddr = IpAddr, Port = Port };
+            TcpClientAsync client = new TcpClientAsync { IPAddr = IpAddr, Port = Port };
+            client.Message2Received += ClientReceivedMessage;
+            client.Disconnected += ClientDisconnected;
+            connector = client;
             await connector.Connect().ConfigureAwait(false);
             await SendClientHandshake().ConfigureAwait(false);
         }
@@ -126,8 +137,38 @@ namespace Network10Lib
             if (connector is not null)
             {
                 await connector.Disconnect();
+                TcpServerAsync? server;
+                if ((server = connector as TcpServerAsync) is not null)
+                {
+                    ServerDisconnected(server);
+                }
                 connector = null;
             }
+        }
+
+        private void ClientDisconnected(TcpClientAsync sender)
+        {
+            sender.Message2Received -= ClientReceivedMessage;
+            sender.Disconnected -= ClientDisconnected;
+            myAdr = -1;
+            this.connector = null;
+            Disonnected?.Invoke();
+        }
+
+        private void ServerDisconnected(TcpServerAsync sender)
+        {
+            PlayerDisonnected?.Invoke(0);
+            sender.Message2Received -= ServerReceivedMessage;
+            sender.ClientDisconnected -= ServerLostClient;
+            myAdr = -1;
+            this.connector = null;
+            Disonnected?.Invoke();
+        }
+
+
+        private void ServerLostClient(TcpServerAsync sender, int clientNr, TcpClient client)
+        {
+            PlayerDisonnected?.Invoke(clientNr + 1);
         }
 
         private async Task SendClientHandshake()
