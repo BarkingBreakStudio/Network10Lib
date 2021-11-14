@@ -9,14 +9,14 @@ using Xunit;
 
 namespace Network10Lib2.Tests
 {
-    public  class DemoCalculatorTests
+    public class DemoCalculatorTests
     {
         [Fact]
         public void Add_SimpleValueSHouldCalculate()
         {
             float expected = 5;
 
-            float actual = DemoCalculator.Add(3,2);
+            float actual = DemoCalculator.Add(3, 2);
 
             Assert.Equal(expected, actual);
         }
@@ -31,5 +31,14 @@ namespace Network10Lib2.Tests
             Assert.Equal(expected, actual);
         }
 
+
+        [Fact]
+        public void StringObjectTest()
+        {
+            string s = "sale;";
+            object obj = s;
+            string? s2 = obj as string;
+            Assert.Equal(s, s2);
+        }
     }
 }

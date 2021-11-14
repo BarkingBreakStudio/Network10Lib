@@ -32,7 +32,7 @@ namespace _01_WindowsForms
                 tcpServerAsync.MessageReceived += TcpServerAsync_MessageReceived;
                 tcpServerAsync.ClientConnected += TcpServerAsync_ClientConnected;
                 tcpServerAsync.ClientDisconnected += TcpServerAsync_ClientDisconnected;
-                tcpServerAsync.Start();
+                await tcpServerAsync.Connect();
                 Log("Server started");
                 cmd_serverStart.Text = "Stop";
             }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xunit;
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Network10Lib2.Tests
 {
@@ -67,5 +68,100 @@ namespace Network10Lib2.Tests
             }
         }
 
+        public class House
+        {
+            public string Name { get; set; } = "";
+        }
+
+        public class Person3<T>
+        {
+            public string Name { get; set; } = "";
+            public int Age { get; set; }
+            public float Position { get; set; }
+            public object StringObject { get; set; } = "";
+            public object BoolObject { get; set; } = "";
+            public object ObjectObject { get; set; } = "";
+            public T? TObject { get; set; }
+        }
+
+        [Fact]
+        public void SerializeDeserialize_ObjectInsideObjectTest()
+        {
+            Person3<House> p = new Person3<House> { Name = "Max Müsert^^\"\"", Age = 55, Position = 12.5f, StringObject = "teststring", BoolObject = true, ObjectObject = new House {Name = "myHouse" }, TObject = new House { Name = "myHouse2" } };
+            JsonSerializerOptions options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            
+
+            var s = JsonSerializer.Serialize(p, options);
+            Console.WriteLine(s);
+
+            options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            options.Converters.Add(new ObjectBoolConverter());
+            Person3<object>? p2 = JsonSerializer.Deserialize<Person3<object>>(s, options);
+            Assert.NotNull(p2);
+            if (p2 is not null)
+            {
+                Assert.True(p2 is Person3<object>);
+                Assert.Equal("Max Müsert^^\"\"", p2.Name);
+                Assert.Equal(55, p2.Age);
+                Assert.Equal(12.5f, p2.Position);
+                Assert.Equal(true, p2.BoolObject);
+                Assert.Equal("teststring", p2.StringObject);
+                JsonElement je = (JsonElement?)p2.TObject ?? new JsonElement();
+                House? h2 = JsonSerializer.Deserialize<House>(je, options);
+                Assert.Equal("myHouse2", h2?.Name);
+
+                /*
+                JsonElement js = (JsonElement)p2.StringObject;
+                Assert.Equal(JsonValueKind.String, js.ValueKind);
+                JsonElement js2 = (JsonElement)p2.BoolObject;
+                Assert.Equal(JsonValueKind.True, js.ValueKind);
+                //Nullable<string> test = p2.MoreData as Nullable<string>;
+                //Assert.Equal("someData", (p2.MoreData as Nullable<string>).Value);*/
+            }
+        }
+
+
+
+        public class ObjectBoolConverter : JsonConverter<object>
+        {
+            public override object Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.True)
+                {
+                    return true;
+                }
+
+                if (reader.TokenType == JsonTokenType.False)
+                {
+                    return false;
+                }
+
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    return reader.GetString() ?? "";
+                }
+
+
+                // Forward to the JsonElement converter
+                var converter = options.GetConverter(typeof(JsonElement)) as JsonConverter<JsonElement>;
+                if (converter != null)
+                {
+                    return converter.Read(ref reader, type, options);
+                }
+
+                throw new JsonException();
+
+                // or for best performance, copy-paste the code from that converter:
+                //using (JsonDocument document = JsonDocument.ParseValue(ref reader))
+                //{
+                //    return document.RootElement.Clone();
+                //}
+            }
+
+            public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+            {
+                throw new InvalidOperationException("Directly writing object not supported");
+            }
+        }
     }
 }

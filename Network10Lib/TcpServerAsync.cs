@@ -7,11 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Network10Lib;
-public class TcpServerAsync
+public class TcpServerAsync : ITcpConnectorAsync
 {
 
     public delegate void MessageReceivedHandler(TcpServerAsync sender, int clientNr, TcpClient client, string message);
     public event MessageReceivedHandler? MessageReceived;
+    public delegate void MessageReceivedHandler2(TcpConnectionAsync.Message msg, int clientNr);
+    public event MessageReceivedHandler2? Message2Received;
     public delegate void ClientConnectedHandler(TcpServerAsync sender, int clientNr, TcpClient client);
     public event ClientConnectedHandler? ClientConnected;
     public delegate void ClientDisconnectedHandler(TcpServerAsync sender, int clientNr, TcpClient client);
@@ -23,15 +25,32 @@ public class TcpServerAsync
     Task? tListen;
     List<Task> clientTasks = new List<Task>();
     List<TcpClient> clients = new List<TcpClient>();
+    private static UTF8Encoding encoding = new UTF8Encoding();
 
-    public void Start()
+    public IPAddress IPAddr { get; init;} = IPAddress.Any;
+    public int Port { get; init; } = 12345;
+
+
+
+    public TcpServerAsync()
+    {
+    }
+
+    public TcpServerAsync(IPAddress IPAddr, int Port)
+    {
+        this.IPAddr = IPAddr;
+        this.Port = Port;
+    }
+
+    public Task Connect()
     {
         if (tcpListener is null)
         {
-            tcpListener = new TcpListener(IPAddress.Any, 12345);
+            tcpListener = new TcpListener(IPAddr, 12345);
             tcpListener.Start();
             tListen = Task.Factory.StartNew(() => { AcceptClientAsync(tcpListener).Wait(); }, TaskCreationOptions.LongRunning);
         }
+        return Task.CompletedTask;
     }
 
 
@@ -69,8 +88,13 @@ public class TcpServerAsync
                     buffer = new byte[dataLength];
                 }
                 await client.GetStream().ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
-                MessageReceived?.Invoke(this, clientNr, client, new UTF8Encoding().GetString(buffer, 0, dataLength));
-                await client.GetStream().WriteAsync(buffer, 0, dataLength).ConfigureAwait(false);
+                string recvString = encoding.GetString(buffer, 0, dataLength);
+                MessageReceived?.Invoke(this, clientNr, client, recvString);
+                TcpConnectionAsync.Message? msg = TcpConnectionAsync.Message.Deserialize(recvString);
+                if (msg is not null)
+                {
+                    Message2Received?.Invoke(msg, clientNr);
+                }
             }
         }
         catch (OperationCanceledException){}
@@ -86,7 +110,7 @@ public class TcpServerAsync
     {
         if (clientNr < clients.Count)
         {
-            byte[] buffer = new UTF8Encoding().GetBytes(text);
+            byte[] buffer = encoding.GetBytes(text);
             await clients[clientNr].GetStream().WriteAsync(buffer, 0, buffer.Length);
         }
     }
@@ -101,7 +125,7 @@ public class TcpServerAsync
 
     public async Task Write(TcpClient client, string text)
     {
-        byte[] buffer = new UTF8Encoding().GetBytes(text);
+        byte[] buffer = encoding.GetBytes(text);
         await client.GetStream().WriteAsync(buffer, 0, buffer.Length);
     }
 
@@ -109,6 +133,26 @@ public class TcpServerAsync
     {
         await client.GetStream().WriteAsync(buffer);
     }
+
+    public async Task SendMessage(TcpConnectionAsync.Message msg)
+    {
+        if(msg.Receiver == 0)
+        {
+            //todo: send to callback
+        }
+        else if (msg.Receiver <= clients.Count)
+        {
+            TcpClient client = clients[msg.Receiver - 1];
+            byte[] buffer = encoding.GetBytes(msg.Serialize());
+            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+            await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
 
     public async Task Stop()
     {
@@ -122,5 +166,11 @@ public class TcpServerAsync
         cts.Dispose();
         tcpListener = null;
     }
+
+    public async Task Disconnect()
+    {
+        await Stop().ConfigureAwait(false);
+    }
+
 }
 
