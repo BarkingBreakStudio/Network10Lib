@@ -27,13 +27,42 @@ public class TcpConnectionTest
     public async void TcpConnector_SimpleTest()
     {
         TcpConnectionAsync server = new TcpConnectionAsync();
-        await server.OpenServer();
+        {
+            GetCallback gc = new();
+            server.Connected += gc.Callback;
+
+            GetObjectFromCallback<int> gofc = new();
+            server.PlayerConnected += gofc.Callback;
+
+            await server.OpenServer();
+
+            gc.WaitForCallback();
+            server.Connected -= gc.Callback;
+
+            Assert.Equal(0, gofc.WaitForObj());
+            server.PlayerConnected -= gofc.Callback;
+
+        }
         Assert.True(server.IsConnected);
         Assert.True(server.IsServer);
 
         TcpConnectionAsync client = new TcpConnectionAsync();
-        await client.OpenClient();
-        await Task.Delay(1000);
+        {//get client conneced message
+            GetCallback gc = new();
+            client.Connected += gc.Callback;
+
+            GetObjectFromCallback<int> gofc = new();
+            server.PlayerConnected += gofc.Callback;
+
+            await client.OpenClient();
+
+            gc.WaitForCallback();
+            client.Connected -= gc.Callback;
+
+            Assert.Equal(1, gofc.WaitForObj());
+            server.PlayerConnected -= gofc.Callback;
+        }
+        
         Assert.True(client.IsConnected);
         Assert.False(client.IsServer);
 
@@ -74,12 +103,8 @@ public class TcpConnectionTest
             client.MessageReceived -= gofc.Callback;
         }
 
-
-
         await client.Close();
-        await server.Close();
-
-       
+        await server.Close(); 
     }
 
 
@@ -115,6 +140,22 @@ public class TcpConnectionTest
         {
             Assert.Equal(shouldSucceed, are.WaitOne(msTimeout));
             return obj;
+        }
+
+    }
+
+    public class GetCallback
+    {
+        AutoResetEvent are = new AutoResetEvent(false);
+
+        public void Callback()
+        {
+            are.Set();
+        }
+
+        public void WaitForCallback(bool shouldSucceed = true, int msTimeout = 1000)
+        {
+            Assert.Equal(shouldSucceed, are.WaitOne(msTimeout));
         }
 
     }

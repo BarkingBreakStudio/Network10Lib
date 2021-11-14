@@ -22,6 +22,16 @@ namespace Network10Lib
         public delegate void MessageReceivedHandler(Message msg);
         public event MessageReceivedHandler? MessageReceived;
 
+        public delegate void ConnectedHandler();
+        public event ConnectedHandler? Connected;
+        public delegate void DisconnectedHandler();
+        public event DisconnectedHandler? Disonnected;
+
+        public delegate void PlayerConnectedHandler(int playerNr);
+        public event PlayerConnectedHandler? PlayerConnected;
+        public delegate void PlayerDisconnectedHandler(int playerNr);
+        public event PlayerDisconnectedHandler? PlayerDisonnected;
+
         public TcpConnectionAsync()
         {
 
@@ -38,6 +48,8 @@ namespace Network10Lib
             await connector.Connect().ConfigureAwait(false);
             myAdr = 0;
             IsServer = true;
+            Connected?.Invoke();
+            PlayerConnected?.Invoke(0);
         }
 
         public async Task OpenServer(int Port)
@@ -51,6 +63,8 @@ namespace Network10Lib
             await connector.Connect().ConfigureAwait(false);
             myAdr = 0;
             IsServer = true;
+            Connected?.Invoke();
+            PlayerConnected?.Invoke(0);
         }
 
         public async Task OpenServer(IPAddress IpAddr, int Port)
@@ -64,6 +78,8 @@ namespace Network10Lib
             await connector.Connect().ConfigureAwait(false);
             myAdr = 0;
             IsServer = true;
+            Connected?.Invoke();
+            PlayerConnected?.Invoke(0);
         }
 
 
@@ -145,6 +161,7 @@ namespace Network10Lib
                         msg.MsgType = Message.EnumMsgType.ServerHandshake;
                         msg.Data = ServerConnectionId;
                         connector?.SendMessage(msg).Wait(); //important to wait here for thread safety
+                        PlayerConnected?.Invoke(clientNr + 1); //todo: there could potentailly be a client which tries to send multiple ClientHandshakes
                     }
                     break;
                 case Message.EnumMsgType.Tcp:
@@ -169,7 +186,9 @@ namespace Network10Lib
                     if (s is not null && s == ServerConnectionId)
                     {
                         myAdr = msg.Receiver;
+                        Connected?.Invoke();
                     }
+                    //todo else close connection
                     break;
                 case Message.EnumMsgType.Tcp:
                     MessageReceived?.Invoke(msg);
