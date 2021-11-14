@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Network10Lib
 {
-    internal interface ITcpConnectorAsync
+    public interface ITcpConnectorAsync
     {
 
         public Task Connect();

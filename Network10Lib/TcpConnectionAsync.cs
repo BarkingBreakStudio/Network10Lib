@@ -19,6 +19,9 @@ namespace Network10Lib
         public string ClientConnectionId { get; init; } = "DefaultConnectionIdClientV0.0.1";
         public string ServerConnectionId { get; init; } = "DefaultConnectionIdServerV0.0.1";
 
+        public delegate void MessageReceivedHandler(Message msg);
+        public event MessageReceivedHandler? MessageReceived;
+
         public TcpConnectionAsync()
         {
 
@@ -131,17 +134,27 @@ namespace Network10Lib
 
         private void ServerReceivedMessage(Message msg, int clientNr)
         {
-            switch(msg.MsgType)
+            switch (msg.MsgType)
             {
                 case Message.EnumMsgType.ClientHandshake:
                     string? s = msg.DeserializeData<string>();
-                    if(s is not null && s == ClientConnectionId)
+                    if (s is not null && s == ClientConnectionId)
                     {
                         msg.Sender = 0;
                         msg.Receiver = clientNr + 1;
                         msg.MsgType = Message.EnumMsgType.ServerHandshake;
                         msg.Data = ServerConnectionId;
-                        connector?.SendMessage(msg).Wait();
+                        connector?.SendMessage(msg).Wait(); //important to wait here for thread safety
+                    }
+                    break;
+                case Message.EnumMsgType.Tcp:
+                    if (msg.Receiver == 0)
+                    {
+                        MessageReceived?.Invoke(msg);
+                    }
+                    else
+                    {
+                        connector?.SendMessage(msg).Wait(); //important to wait here for thread safety
                     }
                     break;
             }
@@ -157,6 +170,9 @@ namespace Network10Lib
                     {
                         myAdr = msg.Receiver;
                     }
+                    break;
+                case Message.EnumMsgType.Tcp:
+                    MessageReceived?.Invoke(msg);
                     break;
             }
         }
@@ -176,7 +192,7 @@ namespace Network10Lib
             public int Sender { get; set; }
             public int Receiver { get; set; }
             public EnumMsgType MsgType { get; set; }
-            public object? Data { get; set; }
+            public object Data { get; set; } = "";
 
             public string Serialize()
             {

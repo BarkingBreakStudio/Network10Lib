@@ -138,7 +138,12 @@ public class TcpServerAsync : ITcpConnectorAsync
     {
         if(msg.Receiver == 0)
         {
-            //todo: send to callback
+            string json = msg.Serialize();
+            var msgDes = TcpConnectionAsync.Message.Deserialize(json);
+            if (msgDes is not null)
+            {
+                Message2Received?.Invoke(msgDes, -1);
+            }
         }
         else if (msg.Receiver <= clients.Count)
         {
