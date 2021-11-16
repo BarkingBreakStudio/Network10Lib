@@ -32,6 +32,7 @@
             this.cmd_openClientForm = new System.Windows.Forms.Button();
             this.cmd_TestAsync = new System.Windows.Forms.Button();
             this.txt_TestLog = new System.Windows.Forms.TextBox();
+            this.cmd_TcpConnection = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmd_openServerForm
@@ -72,11 +73,22 @@
             this.txt_TestLog.Size = new System.Drawing.Size(304, 154);
             this.txt_TestLog.TabIndex = 3;
             // 
+            // cmd_TcpConnection
+            // 
+            this.cmd_TcpConnection.Location = new System.Drawing.Point(42, 179);
+            this.cmd_TcpConnection.Name = "cmd_TcpConnection";
+            this.cmd_TcpConnection.Size = new System.Drawing.Size(216, 29);
+            this.cmd_TcpConnection.TabIndex = 4;
+            this.cmd_TcpConnection.Text = "new Tcp Connection";
+            this.cmd_TcpConnection.UseVisualStyleBackColor = true;
+            this.cmd_TcpConnection.Click += new System.EventHandler(this.cmd_TcpConnection_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.cmd_TcpConnection);
             this.Controls.Add(this.txt_TestLog);
             this.Controls.Add(this.cmd_TestAsync);
             this.Controls.Add(this.cmd_openClientForm);
@@ -95,5 +107,6 @@
         private Button cmd_openClientForm;
         private Button cmd_TestAsync;
         private TextBox txt_TestLog;
+        private Button cmd_TcpConnection;
     }
 }

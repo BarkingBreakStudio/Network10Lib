@@ -17,8 +17,8 @@ namespace Network10Lib
 
         public bool IsServer { get; private set; }
         public bool IsConnected => (connector != null && myAdr != -1);
-        public string ClientConnectionId { get; init; } = "DefaultConnectionIdClientV0.0.1";
-        public string ServerConnectionId { get; init; } = "DefaultConnectionIdServerV0.0.1";
+        public string ClientConnectionId { private get; init; } = "DefaultConnectionIdClientV0.0.1";
+        public string ServerConnectionId { private get; init; } = "DefaultConnectionIdServerV0.0.1";
 
         public delegate void MessageReceivedHandler(Message msg);
         public event MessageReceivedHandler? MessageReceived;
@@ -32,6 +32,10 @@ namespace Network10Lib
         public event PlayerConnectedHandler? PlayerConnected;
         public delegate void PlayerDisconnectedHandler(int playerNr);
         public event PlayerDisconnectedHandler? PlayerDisonnected;
+
+        //inertnal events
+        private delegate void ServerHandshakeResponseHandler(bool success);
+        private event Action<bool>? ServerHandshakeResponsed;
 
         public TcpConnectionAsync()
         {
@@ -173,11 +177,22 @@ namespace Network10Lib
 
         private async Task SendClientHandshake()
         {
+            AutoResetEvent arw = new AutoResetEvent(false);
+            bool handshakeSuccess = false;
+            Action<bool> eventCatcher = (resp) => { handshakeSuccess = resp; arw.Set(); };
+
+            ServerHandshakeResponsed += eventCatcher;
+
             if (connector is not null)
             {
                 Message msg = new Message { Sender = -1, Receiver = 0, MsgType = Message.EnumMsgType.ClientHandshake, Data = ClientConnectionId };
                 await connector.SendMessage(msg).ConfigureAwait(false);
             }
+
+            arw.WaitOne(1000);
+            ServerHandshakeResponsed -= eventCatcher;
+            if (!handshakeSuccess)
+                throw new Exception("Server is not compatible");
         }
 
         public async Task SendObject(object obj,int destination)
@@ -228,8 +243,14 @@ namespace Network10Lib
                     {
                         myAdr = msg.Receiver;
                         Connected?.Invoke();
+                        ServerHandshakeResponsed?.Invoke(true);
                     }
-                    //todo else close connection
+                    else
+                    {
+                        ServerHandshakeResponsed?.Invoke(false);
+                        //todo else close connection
+                    }
+
                     break;
                 case Message.EnumMsgType.Tcp:
                     MessageReceived?.Invoke(msg);
@@ -274,6 +295,12 @@ namespace Network10Lib
                 {
                     return default(T);
                 }
+            }
+
+            public override string ToString()
+            {
+                //T? data = DeserializeData<T>();
+                return $"Message{{ Sender: {Sender}, Receiver: { Receiver}, MsgType: { MsgType } Data: { Data.ToString() }  }}";
             }
 
         }

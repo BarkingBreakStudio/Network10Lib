@@ -21,7 +21,7 @@ namespace _01_WindowsForms
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            cmd_TcpConnection_Click(sender, e);
         }
 
         private async void cmd_TestAsync_Click(object sender, EventArgs e)
@@ -43,5 +43,12 @@ namespace _01_WindowsForms
             await Task.Delay(1000).ConfigureAwait(false);
             txt_TestLog.Text += "End heavy work" + Environment.NewLine;
         }
+
+        private void cmd_TcpConnection_Click(object sender, EventArgs e)
+        {
+            TcpConnectionForm form1 = new TcpConnectionForm();
+            form1.Show();
+        }
+
     }
 }

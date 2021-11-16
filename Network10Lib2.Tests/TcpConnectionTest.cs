@@ -109,8 +109,6 @@ public class TcpConnectionTest
         TcpConnectionAsync client = new TcpConnectionAsync();
         await client.OpenClient();
 
-        await Task.Delay(1000);//todo: remove this
-
         //disconnect client first: 
         GetEvent cd = new();
         client.Disonnected += cd.Callback;
@@ -130,11 +128,7 @@ public class TcpConnectionTest
         client = new TcpConnectionAsync();
         await client.OpenClient();
 
-        await Task.Delay(1000);//todo: remove this
-
-
         //disconnect server first
-
         GetEvent cd2 = new();
         client.Disonnected += cd2.Callback;
         GetEvent sd2 = new();
