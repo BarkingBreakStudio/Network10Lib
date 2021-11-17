@@ -4,14 +4,33 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Network10Lib.DemoWPF"
-        mc:Ignorable="d" FontSize="18" FontFamily="Segoe UI"
-        Title="Tcp Connection Demo" Height="450" Width="800">
-    <Grid>
+        mc:Ignorable="d" FontSize="16" FontFamily="Segoe UI"
+        
+        Title="Tcp Connection Demo" Height="900" Width="800" Closing="Window_Closing">
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5 2"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5 2"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style TargetType="GroupBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="#FFABADB3"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#FFF5F5F5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
@@ -23,13 +42,144 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="1" Grid.Row="1" FontSize="50" Grid.ColumnSpan="3" Margin="20,0,0,10" Text="Hi world"/>
-        <TextBlock Grid.Column="1" Grid.Row="2" FontWeight="bold">First Name</TextBlock>
-        <TextBox x:Name="firstNameText" Grid.Row="2" Grid.Column="2" MinWidth="150">sali</TextBox>
-        <Button x:Name="sumitButton" Content="Run me" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Margin="10" Click="sumitButton_Click"/>
+        <GroupBox Header="Connections" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Button x:Name="cmd_OpenNewWindow" Grid.Row="0" Grid.Column="0" Click="cmd_OpenNewWindow_Click">open new connection window</Button>
+                <Button x:Name="cmd_CloseWindow" Grid.Row="0" Grid.Column="1" Click="cmd_CloseWindow_Click">close this connection window</Button>
+            </Grid>
+        </GroupBox>
+            
+
+
+        <GroupBox Header="SharedParameter" Grid.Row="2" Grid.Column="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="1" Grid.Column="1" > Server Identifier:</TextBlock>
+                <TextBox x:Name="txt_ServerIdentifier" Grid.Row="1" Grid.Column="3">TestDemoServer123456</TextBox>
+                <TextBlock Text="Client Identifier:" Grid.Row="2" Grid.Column="1"></TextBlock>
+                <TextBox x:Name="txt_ClientIdentifier" Grid.Row="2" Grid.Column="3">TestDemoClient123456</TextBox>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Status" Grid.Row="2" Grid.Column="2">
+            <TextBlock x:Name="lbl_Status"> sdf<LineBreak />kahusdsdf<LineBreak />kahusd </TextBlock>
+        </GroupBox>
+        <GroupBox Header="Server" Grid.Row="3" Grid.Column="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="1" Grid.Column="1" > Ip Address:</TextBlock>
+                <TextBox x:Name="txt_ServerIpAdr" Grid.Row="1" Grid.Column="3">0.0.0.0</TextBox>
+                <TextBlock Text="Port:" Grid.Row="2" Grid.Column="1"></TextBlock>
+                <TextBox x:Name="txt_ServerPort" Grid.Row="2" Grid.Column="3">12345</TextBox>
+                <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Button Grid.Column="0" x:Name="cmd_OpenServer" Click="cmd_OpenServer_Click">open Server</Button>
+                    <Button Grid.Column="1" x:Name="cmd_CloseServer" Click="cmd_CloseServer_Click">close Server</Button>
+                </Grid>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Client" Grid.Row="3" Grid.Column="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="1" Grid.Column="1" > Ip Address:</TextBlock>
+                <TextBox x:Name="txt_ClientIpAdr" Grid.Row="1" Grid.Column="3">127.0.0.1</TextBox>
+                <TextBlock Text="Port:" Grid.Row="2" Grid.Column="1"></TextBlock>
+                <TextBox x:Name="txt_ClientPort" Grid.Row="2" Grid.Column="3">12345</TextBox>
+                <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Button Grid.Column="0" x:Name="cmd_OpenClient" Click="cmd_OpenClient_Click">open Client</Button>
+                    <Button Grid.Column="1" x:Name="cmd_CloseClient" Click="cmd_CloseClient_Click">close Client</Button>
+                </Grid>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Send" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="1" Grid.Column="1">MessageData</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="2">ReceiverClientNr.</TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Margin="5" x:Name="txt_sendMessageData">Hallo!</TextBox>
+                <TextBox Grid.Row="2" Grid.Column="2" Margin="5" x:Name="txt_sendMessageDestination">0</TextBox>
+                <Button Grid.Row="2" Grid.Column="3" x:Name="cmd_SendMessage" Click="cmd_sendMessage_Click">send Message</Button>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Receive" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2">
+            <TextBox x:Name="txt_MsgReveive" Height="200" Background="#FFF5F5F5" Margin="5" VerticalScrollBarVisibility="Visible" IsReadOnly="False" Focusable="False"/>
+        </GroupBox>
+        <GroupBox Header="Connected Clients (Server Only)" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2">
+            <ListView x:Name="listV_Players" Height="200" Background="#FFF5F5F5" Margin="5"></ListView>
+        </GroupBox>
     </Grid>
 </Window>
