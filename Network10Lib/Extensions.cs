@@ -22,5 +22,14 @@ namespace Network10Lib
             } while (nRead != length);
         }
 
+        /// <summary>
+        /// Waits as Wait() but unwraps Errors in case the thasks throws an error
+        /// </summary>
+        /// <param name="t">Task to wait for</param>
+        internal static void WaitE(this Task t)
+        {
+            t.GetAwaiter().GetResult();
+        }
+
     }
 }

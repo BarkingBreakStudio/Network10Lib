@@ -19,35 +19,15 @@ namespace _01_WindowsForms
             form1.Show();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            cmd_TcpConnection_Click(sender, e);
-        }
-
-        private async void cmd_TestAsync_Click(object sender, EventArgs e)
-        {
-            txt_TestLog.Text = "";
-
-            txt_TestLog.Text += "Start some Async Methos" + Environment.NewLine;
-            Task t = SomeAsyncMethod();
-            
-            //t.Wait();
-            t.GetAwaiter().GetResult();
-            await t;
-            txt_TestLog.Text += "Finished Main" + Environment.NewLine;
-        }
-
-        private async Task SomeAsyncMethod()
-        {
-            txt_TestLog.Text += "Start heavy work" + Environment.NewLine;
-            await Task.Delay(1000).ConfigureAwait(false);
-            txt_TestLog.Text += "End heavy work" + Environment.NewLine;
-        }
-
         private void cmd_TcpConnection_Click(object sender, EventArgs e)
         {
             TcpConnectionForm form1 = new TcpConnectionForm();
             form1.Show();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
 
     }

@@ -48,7 +48,7 @@ public class TcpServerAsync : ITcpConnectorAsync
         {
             tcpListener = new TcpListener(IPAddr, 12345);
             tcpListener.Start();
-            tListen = Task.Factory.StartNew(() => { AcceptClientAsync(tcpListener).Wait(); }, TaskCreationOptions.LongRunning);
+            tListen = TaskLongRunning.Run(() => AcceptClientAsync(tcpListener).WaitE());
         }
         return Task.CompletedTask;
     }
@@ -64,7 +64,7 @@ public class TcpServerAsync : ITcpConnectorAsync
                 int clientNr = clientTasks.Count;
                 ClientConnected?.Invoke(this, clientNr, client);
                 clients.Add(client);
-                clientTasks.Add(Task.Factory.StartNew(() => { ReadClientData(client, clientNr).Wait(); }, TaskCreationOptions.LongRunning));
+                clientTasks.Add(TaskLongRunning.Run(() => ReadClientData(client, clientNr).WaitE()));
             }
         }
         catch (OperationCanceledException) { }
@@ -90,7 +90,7 @@ public class TcpServerAsync : ITcpConnectorAsync
                 await client.GetStream().ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
                 string recvString = encoding.GetString(buffer, 0, dataLength);
                 MessageReceived?.Invoke(this, clientNr, client, recvString);
-                TcpConnectionAsync.Message? msg = TcpConnectionAsync.Message.Deserialize(recvString);
+                TcpConnectionAsync.Message? msg = TcpConnectionAsync.Message.TryDeserialize(recvString);
                 if (msg is not null)
                 {
                     Message2Received?.Invoke(msg, clientNr);
@@ -111,7 +111,8 @@ public class TcpServerAsync : ITcpConnectorAsync
         if (clientNr < clients.Count)
         {
             byte[] buffer = encoding.GetBytes(text);
-            await clients[clientNr].GetStream().WriteAsync(buffer, 0, buffer.Length);
+            await clients[clientNr].GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+            await clients[clientNr].GetStream().WriteAsync(buffer).ConfigureAwait(false);
         }
     }
 
@@ -119,19 +120,22 @@ public class TcpServerAsync : ITcpConnectorAsync
     {
         if (clientNr < clients.Count)
         {
-            await clients[clientNr].GetStream().WriteAsync(buffer);
+            await clients[clientNr].GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+            await clients[clientNr].GetStream().WriteAsync(buffer).ConfigureAwait(false);
         }
     }
 
     public async Task Write(TcpClient client, string text)
     {
         byte[] buffer = encoding.GetBytes(text);
-        await client.GetStream().WriteAsync(buffer, 0, buffer.Length);
+        await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+        await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
     }
 
     public async Task Write(TcpClient client, byte[] buffer)
     {
-        await client.GetStream().WriteAsync(buffer);
+        await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+        await client.GetStream().WriteAsync(buffer).ConfigureAwait(false); ;
     }
 
     public async Task SendMessage(TcpConnectionAsync.Message msg)
@@ -139,7 +143,7 @@ public class TcpServerAsync : ITcpConnectorAsync
         if(msg.Receiver == 0)
         {
             string json = msg.Serialize();
-            var msgDes = TcpConnectionAsync.Message.Deserialize(json);
+            var msgDes = TcpConnectionAsync.Message.TryDeserialize(json);
             if (msgDes is not null)
             {
                 Message2Received?.Invoke(msgDes, -1);

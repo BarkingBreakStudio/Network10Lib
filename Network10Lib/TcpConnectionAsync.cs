@@ -216,7 +216,7 @@ namespace Network10Lib
                         msg.Receiver = clientNr + 1;
                         msg.MsgType = Message.EnumMsgType.ServerHandshake;
                         msg.Data = ServerConnectionId;
-                        connector?.SendMessage(msg).Wait(); //important to wait here for thread safety
+                        connector?.SendMessage(msg).WaitE(); //important to wait here for thread safety
                         PlayerConnected?.Invoke(clientNr + 1); //todo: there could potentailly be a client which tries to send multiple ClientHandshakes
                     }
                     break;
@@ -227,7 +227,7 @@ namespace Network10Lib
                     }
                     else
                     {
-                        connector?.SendMessage(msg).Wait(); //important to wait here for thread safety
+                        connector?.SendMessage(msg).WaitE(); //important to wait here for thread safety
                     }
                     break;
             }
@@ -280,9 +280,16 @@ namespace Network10Lib
                 return JsonSerializer.Serialize(this, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             }
 
-            public static Message? Deserialize(string s)
+            public static Message? TryDeserialize(string s)
             {
-                return JsonSerializer.Deserialize<Message>(s, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                try
+                {
+                    return JsonSerializer.Deserialize<Message>(s, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
 
             public T? DeserializeData<T>()

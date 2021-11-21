@@ -30,14 +30,16 @@
         {
             this.cmd_openServerForm = new System.Windows.Forms.Button();
             this.cmd_openClientForm = new System.Windows.Forms.Button();
-            this.cmd_TestAsync = new System.Windows.Forms.Button();
-            this.txt_TestLog = new System.Windows.Forms.TextBox();
             this.cmd_TcpConnection = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmd_openServerForm
             // 
-            this.cmd_openServerForm.Location = new System.Drawing.Point(42, 135);
+            this.cmd_openServerForm.Location = new System.Drawing.Point(18, 45);
             this.cmd_openServerForm.Name = "cmd_openServerForm";
             this.cmd_openServerForm.Size = new System.Drawing.Size(94, 29);
             this.cmd_openServerForm.TabIndex = 0;
@@ -47,7 +49,7 @@
             // 
             // cmd_openClientForm
             // 
-            this.cmd_openClientForm.Location = new System.Drawing.Point(164, 135);
+            this.cmd_openClientForm.Location = new System.Drawing.Point(136, 45);
             this.cmd_openClientForm.Name = "cmd_openClientForm";
             this.cmd_openClientForm.Size = new System.Drawing.Size(94, 29);
             this.cmd_openClientForm.TabIndex = 1;
@@ -55,49 +57,50 @@
             this.cmd_openClientForm.UseVisualStyleBackColor = true;
             this.cmd_openClientForm.Click += new System.EventHandler(this.cmd_openClientForm_Click);
             // 
-            // cmd_TestAsync
-            // 
-            this.cmd_TestAsync.Location = new System.Drawing.Point(586, 135);
-            this.cmd_TestAsync.Name = "cmd_TestAsync";
-            this.cmd_TestAsync.Size = new System.Drawing.Size(94, 29);
-            this.cmd_TestAsync.TabIndex = 2;
-            this.cmd_TestAsync.Text = "test Async";
-            this.cmd_TestAsync.UseVisualStyleBackColor = true;
-            this.cmd_TestAsync.Click += new System.EventHandler(this.cmd_TestAsync_Click);
-            // 
-            // txt_TestLog
-            // 
-            this.txt_TestLog.Location = new System.Drawing.Point(461, 207);
-            this.txt_TestLog.Multiline = true;
-            this.txt_TestLog.Name = "txt_TestLog";
-            this.txt_TestLog.Size = new System.Drawing.Size(304, 154);
-            this.txt_TestLog.TabIndex = 3;
-            // 
             // cmd_TcpConnection
             // 
-            this.cmd_TcpConnection.Location = new System.Drawing.Point(42, 179);
+            this.cmd_TcpConnection.Location = new System.Drawing.Point(18, 37);
             this.cmd_TcpConnection.Name = "cmd_TcpConnection";
-            this.cmd_TcpConnection.Size = new System.Drawing.Size(216, 29);
+            this.cmd_TcpConnection.Size = new System.Drawing.Size(212, 29);
             this.cmd_TcpConnection.TabIndex = 4;
             this.cmd_TcpConnection.Text = "new Tcp Connection";
             this.cmd_TcpConnection.UseVisualStyleBackColor = true;
             this.cmd_TcpConnection.Click += new System.EventHandler(this.cmd_TcpConnection_Click);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.cmd_openClientForm);
+            this.groupBox1.Controls.Add(this.cmd_openServerForm);
+            this.groupBox1.Location = new System.Drawing.Point(32, 26);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(250, 103);
+            this.groupBox1.TabIndex = 5;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Demo low level Components";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.cmd_TcpConnection);
+            this.groupBox2.Location = new System.Drawing.Point(32, 150);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(250, 103);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Demo high level Component";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.cmd_TcpConnection);
-            this.Controls.Add(this.txt_TestLog);
-            this.Controls.Add(this.cmd_TestAsync);
-            this.Controls.Add(this.cmd_openClientForm);
-            this.Controls.Add(this.cmd_openServerForm);
+            this.ClientSize = new System.Drawing.Size(335, 305);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -105,8 +108,8 @@
 
         private Button cmd_openServerForm;
         private Button cmd_openClientForm;
-        private Button cmd_TestAsync;
-        private TextBox txt_TestLog;
         private Button cmd_TcpConnection;
+        private GroupBox groupBox1;
+        private GroupBox groupBox2;
     }
 }

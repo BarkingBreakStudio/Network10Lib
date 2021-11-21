@@ -43,7 +43,7 @@ public class TcpClientAsync : ITcpConnectorAsync
         {
             client = new TcpClient();
             await client.ConnectAsync(new IPEndPoint(IPAddr, Port)).ConfigureAwait(false);
-            tRead = TaskLongRunning.Run(() => { StartReadAsync(client).Wait(); });
+            tRead = TaskLongRunning.Run(() => StartReadAsync(client).WaitE());
         }
     }
 
@@ -85,7 +85,7 @@ public class TcpClientAsync : ITcpConnectorAsync
                 await client.GetStream().ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
                 string recvString = encoding.GetString(buffer, 0, dataLength);
                 MessageReceived?.Invoke(this, recvString);
-                TcpConnectionAsync.Message? msg = TcpConnectionAsync.Message.Deserialize(recvString);
+                TcpConnectionAsync.Message? msg = TcpConnectionAsync.Message.TryDeserialize(recvString);
                 if(msg is not null)
                 {
                     Message2Received?.Invoke(msg);

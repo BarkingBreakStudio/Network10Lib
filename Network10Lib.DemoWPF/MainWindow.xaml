@@ -48,17 +48,10 @@
         </Grid.RowDefinitions>
 
         <GroupBox Header="Connections" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions >
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                <Button x:Name="cmd_OpenNewWindow" Grid.Row="0" Grid.Column="0" Click="cmd_OpenNewWindow_Click">open new connection window</Button>
-                <Button x:Name="cmd_CloseWindow" Grid.Row="0" Grid.Column="1" Click="cmd_CloseWindow_Click">close this connection window</Button>
-            </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <Button HorizontalAlignment="Stretch" x:Name="cmd_OpenNewWindow" Grid.Row="0" Grid.Column="0" Click="cmd_OpenNewWindow_Click">open new connection window</Button>
+                <Button HorizontalAlignment="Stretch" x:Name="cmd_CloseWindow" Grid.Row="0" Grid.Column="1" Click="cmd_CloseWindow_Click">close this connection window</Button>
+            </StackPanel>
         </GroupBox>
             
 
