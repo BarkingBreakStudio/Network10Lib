@@ -1,4 +1,4 @@
-namespace _01_WindowsForms
+namespace Network10Lib.DemoWinForm
 {
     internal static class Program
     {

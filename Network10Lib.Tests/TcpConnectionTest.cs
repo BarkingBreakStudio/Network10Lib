@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Network10Lib;
 
-namespace Network10Lib2.Tests;
+namespace Network10Lib.Tests;
 
 public class TcpConnectionTest
 {

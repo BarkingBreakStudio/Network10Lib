@@ -8,7 +8,7 @@ using Xunit;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Network10Lib2.Tests
+namespace Network10Lib.Tests
 {
     public  class JsonSerializationTests
     {

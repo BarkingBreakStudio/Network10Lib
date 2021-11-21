@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace _01_WindowsForms
+namespace Network10Lib.DemoWinForm
 {
     public partial class ServerForm : Form
     {

@@ -1,4 +1,4 @@
-﻿namespace _01_WindowsForms
+﻿namespace Network10Lib.DemoWinForm
 {
     partial class Form1
     {

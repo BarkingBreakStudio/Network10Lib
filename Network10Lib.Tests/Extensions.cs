@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit.Sdk;
 
-namespace Network10Lib2.Tests
+namespace Network10Lib.Tests
 {
     internal static class Extensions
     {
