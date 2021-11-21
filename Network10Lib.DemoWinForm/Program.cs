@@ -9,7 +9,7 @@ namespace Network10Lib.DemoWinForm
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new FormStart());
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Network10Lib.DemoWinForm
 {
-    partial class Form1
+    partial class FormStart
     {
         /// <summary>
         ///  Required designer variable.
@@ -71,7 +71,7 @@
             // 
             this.groupBox1.Controls.Add(this.cmd_openClientForm);
             this.groupBox1.Controls.Add(this.cmd_openServerForm);
-            this.groupBox1.Location = new System.Drawing.Point(32, 26);
+            this.groupBox1.Location = new System.Drawing.Point(36, 171);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(250, 103);
             this.groupBox1.TabIndex = 5;
@@ -81,21 +81,21 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.cmd_TcpConnection);
-            this.groupBox2.Location = new System.Drawing.Point(32, 150);
+            this.groupBox2.Location = new System.Drawing.Point(36, 40);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(250, 103);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Demo high level Component";
             // 
-            // Form1
+            // FormStart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(335, 305);
+            this.ClientSize = new System.Drawing.Size(333, 305);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
-            this.Name = "Form1";
+            this.Name = "FormStart";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);

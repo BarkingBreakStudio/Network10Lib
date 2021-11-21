@@ -33,11 +33,13 @@
             this.txt_send = new System.Windows.Forms.TextBox();
             this.cmd_Send = new System.Windows.Forms.Button();
             this.txt_clientNr = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cmd_serverStart
             // 
-            this.cmd_serverStart.Location = new System.Drawing.Point(437, 40);
+            this.cmd_serverStart.Location = new System.Drawing.Point(437, 29);
             this.cmd_serverStart.Name = "cmd_serverStart";
             this.cmd_serverStart.Size = new System.Drawing.Size(127, 29);
             this.cmd_serverStart.TabIndex = 0;
@@ -79,11 +81,31 @@
             this.txt_clientNr.TabIndex = 7;
             this.txt_clientNr.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(38, 70);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(106, 20);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Message Data:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(397, 70);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(70, 20);
+            this.label2.TabIndex = 9;
+            this.label2.Text = "Client Nr.";
+            // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.txt_clientNr);
             this.Controls.Add(this.txt_send);
             this.Controls.Add(this.cmd_Send);
@@ -105,5 +127,7 @@
         private TextBox txt_send;
         private Button cmd_Send;
         private TextBox txt_clientNr;
+        private Label label1;
+        private Label label2;
     }
 }

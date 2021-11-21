@@ -40,18 +40,27 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <GroupBox Header="Connections" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <Button HorizontalAlignment="Stretch" x:Name="cmd_OpenNewWindow" Grid.Row="0" Grid.Column="0" Click="cmd_OpenNewWindow_Click">open new connection window</Button>
-                <Button HorizontalAlignment="Stretch" x:Name="cmd_CloseWindow" Grid.Row="0" Grid.Column="1" Click="cmd_CloseWindow_Click">close this connection window</Button>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Button HorizontalAlignment="Stretch" x:Name="cmd_OpenNewWindow" Grid.Row="0" Grid.Column="1" Click="cmd_OpenNewWindow_Click">open new connection window</Button>
+                <Button HorizontalAlignment="Stretch" x:Name="cmd_CloseWindow" Grid.Row="0" Grid.Column="3" Click="cmd_CloseWindow_Click">close this connection window</Button>
+            </Grid>
         </GroupBox>
             
 
@@ -162,17 +171,17 @@
                     <RowDefinition Height="5"/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="1" Grid.Column="1">MessageData</TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="2">ReceiverClientNr.</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="2">Player Receiver Nr.</TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1" Margin="5" x:Name="txt_sendMessageData">Hallo!</TextBox>
                 <TextBox Grid.Row="2" Grid.Column="2" Margin="5" x:Name="txt_sendMessageDestination">0</TextBox>
                 <Button Grid.Row="2" Grid.Column="3" x:Name="cmd_SendMessage" Click="cmd_sendMessage_Click">send Message</Button>
             </Grid>
         </GroupBox>
         <GroupBox Header="Receive" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2">
-            <TextBox x:Name="txt_MsgReveive" Height="200" Background="#FFF5F5F5" Margin="5" VerticalScrollBarVisibility="Visible" IsReadOnly="False" Focusable="False"/>
+            <TextBox x:Name="txt_MsgReveive" MinHeight="100" Background="#FFF5F5F5" Margin="5" VerticalScrollBarVisibility="Visible" IsReadOnly="False" Focusable="False"/>
         </GroupBox>
-        <GroupBox Header="Connected Clients (Server Only)" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2">
-            <ListView x:Name="listV_Players" Height="200" Background="#FFF5F5F5" Margin="5"></ListView>
+        <GroupBox Header="Connected Player Numbers (Server Only)" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2">
+            <ListView x:Name="listV_Players" MinHeight="100" Background="#FFF5F5F5" Margin="5"></ListView>
         </GroupBox>
     </Grid>
 </Window>
