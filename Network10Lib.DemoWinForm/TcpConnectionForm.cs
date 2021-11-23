@@ -38,9 +38,17 @@ namespace Network10Lib.DemoWinForm
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenServer(port, Ipadr);
-                cmd_CloseServer.Enabled = true;
-                cms_sendMessage.Enabled = true;
+                try
+                {
+                    await connection.OpenServer(port, Ipadr);
+                    cmd_CloseServer.Enabled = true;
+                    cms_sendMessage.Enabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message,"Error" , MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    cmd_CloseServer_ClickAsync(sender, e);
+                }
             }
             else
             {
@@ -79,9 +87,17 @@ namespace Network10Lib.DemoWinForm
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenClient(port, Ipadr);
-                cmd_closeClient.Enabled = true;
-                cms_sendMessage.Enabled = true;
+                try
+                {
+                    await connection.OpenClient(port, Ipadr);
+                    cmd_closeClient.Enabled = true;
+                    cms_sendMessage.Enabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    cmd_closeClient_Click(sender, e);
+                }
             }
             else
             {

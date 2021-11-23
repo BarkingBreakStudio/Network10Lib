@@ -48,9 +48,17 @@ namespace Network10Lib.DemoWPF
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenServer(port, Ipadr);
-                cmd_CloseServer.IsEnabled = true;
-                cmd_SendMessage.IsEnabled = true;
+                try
+                {
+                    await connection.OpenServer(port, Ipadr);
+                    cmd_CloseServer.IsEnabled = true;
+                    cmd_SendMessage.IsEnabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    cmd_CloseClient_Click(sender, e);
+                }
             }
             else
             {
@@ -86,9 +94,17 @@ namespace Network10Lib.DemoWPF
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenClient(port, Ipadr);
-                cmd_CloseClient.IsEnabled = true;
-                cmd_SendMessage.IsEnabled = true;
+                try
+                {
+                    await connection.OpenClient(port, Ipadr);
+                    cmd_CloseClient.IsEnabled = true;
+                    cmd_SendMessage.IsEnabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    cmd_CloseServer_Click(sender, e);
+                }
             }
             else
             {

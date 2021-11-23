@@ -19,7 +19,7 @@ public class TcpConnectionTest
         public int Age { get; set; }
     }
 
- 
+
 
     [Fact]
     public async void TcpConnector_ConnectAndSend()
@@ -53,7 +53,7 @@ public class TcpConnectionTest
             int plNr = pc.WaitForEvent();
             Assert.Equal(1, plNr);
         }
-        
+
         Assert.True(client.IsConnected);
         Assert.False(client.IsServer);
 
@@ -95,7 +95,7 @@ public class TcpConnectionTest
         }
 
         await client.Close();
-        await server.Close(); 
+        await server.Close();
     }
 
 
@@ -160,7 +160,60 @@ public class TcpConnectionTest
     }
 
 
-        private void AssertEqual<TmsgData>(MessageN10? expected, MessageN10? actual)
+    [Fact]
+    public async void TcpConnector_WrongHandshakeTest()
+    {
+        {
+            //connect from a client so a server where the client sends a wrong connectionId
+            TcpConnectionN10 server = new TcpConnectionN10();
+            await server.OpenServer();
+
+            TcpConnectionN10 client = new TcpConnectionN10() { ClientConnectionId = "wrongConnectionId" };
+            Exception? exception = null;
+            try
+            {
+                await client.OpenClient();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+            Assert.NotNull(exception);
+            Assert.Equal("Server is not compatible", exception?.Message);
+
+            Assert.False(client.IsConnected);
+
+            await client.Close();
+            await server.Close();
+        }
+
+        {
+            //connect from a client so a server where the server answers with a wrong hanshake
+            TcpConnectionN10 server = new TcpConnectionN10() {  ServerConnectionId = "wrongConnectionId" };
+            await server.OpenServer();
+
+            TcpConnectionN10 client = new TcpConnectionN10() { };
+            Exception? exception = null;
+            try
+            {
+                await client.OpenClient();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+            Assert.NotNull(exception);
+            Assert.Equal("Server is not compatible", exception?.Message);
+
+            Assert.False(client.IsConnected);
+
+            await client.Close();
+            await server.Close();
+        }
+    }
+
+
+    private void AssertEqual<TmsgData>(MessageN10? expected, MessageN10? actual)
     {
         if (expected is null && actual is null)
             return;
@@ -197,8 +250,8 @@ public class TcpConnectionTest
         public void Callback(T obj)
         {
             objs.Add(obj);
-            are.Set() ;
-        }        
+            are.Set();
+        }
 
         public T? WaitForEvent(bool shouldSucceed = true, int msTimeout = 1000)
         {
