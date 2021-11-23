@@ -14,7 +14,7 @@ namespace Network10Lib.DemoWinForm
     public partial class ClientForm : Form
     {
 
-        TcpClientAsync? client;
+        TcpClientN10? client;
       
 
         public ClientForm()
@@ -27,8 +27,8 @@ namespace Network10Lib.DemoWinForm
             if (client is null)
             {
                 Log("Connecting...");
-                client = new TcpClientAsync();
-                client.MessageReceived += Client_MessageReceived;
+                client = new TcpClientN10();
+                client.StringReceived += Client_MessageReceived;
                 client.Disconnected += Client_Disconnected;
                 await client.Connect();
                 Log("Connected");
@@ -37,7 +37,7 @@ namespace Network10Lib.DemoWinForm
             else
             {
                 Log("Disconnecting...");
-                client.MessageReceived -= Client_MessageReceived;
+                client.StringReceived -= Client_MessageReceived;
                 client.Disconnected -= Client_Disconnected;
                 await client.Disconnect();
                 client = null;
@@ -46,12 +46,12 @@ namespace Network10Lib.DemoWinForm
             }
         }
 
-        private void Client_Disconnected(TcpClientAsync sender)
+        private void Client_Disconnected(TcpClientN10 sender)
         {
             Log($"Client disconnected");
         }
 
-        private void Client_MessageReceived(TcpClientAsync sender, string message)
+        private void Client_MessageReceived(TcpClientN10 sender, string message)
         {
             Log($"Message received: {message}");
         }
@@ -61,7 +61,7 @@ namespace Network10Lib.DemoWinForm
             if (client is not null)
             {
                 Log($"Message sending: {txt_send.Text} ...");
-                await client.Write(txt_send.Text);
+                await client.WriteString(txt_send.Text);
                 Log($"Message sent");
             }
         }

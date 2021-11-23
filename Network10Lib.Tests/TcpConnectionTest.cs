@@ -24,7 +24,7 @@ public class TcpConnectionTest
     [Fact]
     public async void TcpConnector_ConnectAndSend()
     {
-        TcpConnectionAsync server = new TcpConnectionAsync();
+        TcpConnectionN10 server = new TcpConnectionN10();
         {
             GetEvent sc = new();
             sc.Init(() => server.Connected += sc.Callback, () => server.Connected -= sc.Callback);
@@ -40,7 +40,7 @@ public class TcpConnectionTest
         Assert.True(server.IsConnected);
         Assert.True(server.IsServer);
 
-        TcpConnectionAsync client = new TcpConnectionAsync();
+        TcpConnectionN10 client = new TcpConnectionN10();
         {//get client conneced message
             GetEvent cc = new();
             cc.Init(() => client.Connected += cc.Callback, () => client.Connected -= cc.Callback);
@@ -59,38 +59,38 @@ public class TcpConnectionTest
 
 
         {//send from client to server
-            var gofc = new GetEventParam<TcpConnectionAsync.Message>();
+            var gofc = new GetEventParam<MessageN10>();
             server.MessageReceived += gofc.Callback;
             Person p = new Person { Name = "Hans", Address = "Nizza", City = "La Palma", Age = 58 };
             await client.SendObject(p, 0);
-            AssertEqual<Person>(new TcpConnectionAsync.Message { Sender = 1, Receiver = 0, MsgType = TcpConnectionAsync.Message.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 1, Receiver = 0, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
             server.MessageReceived -= gofc.Callback;
         }
 
         {//send from server to client
-            var gofc = new GetEventParam<TcpConnectionAsync.Message>();
+            var gofc = new GetEventParam<MessageN10>();
             client.MessageReceived += gofc.Callback;
             Person p = new Person { Name = "Robert", Address = "Bahamas", City = "Lama", Age = 45 };
             await server.SendObject(p, 1);
-            AssertEqual<Person>(new TcpConnectionAsync.Message { Sender = 0, Receiver = 1, MsgType = TcpConnectionAsync.Message.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 0, Receiver = 1, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
             client.MessageReceived -= gofc.Callback;
         }
 
         {//send from server to itself
-            var gofc = new GetEventParam<TcpConnectionAsync.Message>();
+            var gofc = new GetEventParam<MessageN10>();
             server.MessageReceived += gofc.Callback;
             Person p = new Person { Name = "Lulu", Address = "Lemon", City = "Secret", Age = 5 };
             await server.SendObject(p, 0);
-            AssertEqual<Person>(new TcpConnectionAsync.Message { Sender = 0, Receiver = 0, MsgType = TcpConnectionAsync.Message.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 0, Receiver = 0, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
             server.MessageReceived -= gofc.Callback;
         }
 
         {//send from client to itself
-            var gofc = new GetEventParam<TcpConnectionAsync.Message>();
+            var gofc = new GetEventParam<MessageN10>();
             client.MessageReceived += gofc.Callback;
             Person p = new Person { Name = "Tenscent", Address = "China", City = "Morescent", Age = 18 };
             await client.SendObject(p, 1);
-            AssertEqual<Person>(new TcpConnectionAsync.Message { Sender = 1, Receiver = 1, MsgType = TcpConnectionAsync.Message.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 1, Receiver = 1, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofc.WaitForEvent());
             client.MessageReceived -= gofc.Callback;
         }
 
@@ -103,10 +103,10 @@ public class TcpConnectionTest
     public async void TcpConnector_Disconnect()
     {
         //create server and client
-        TcpConnectionAsync server = new TcpConnectionAsync();
+        TcpConnectionN10 server = new TcpConnectionN10();
         await server.OpenServer();
 
-        TcpConnectionAsync client = new TcpConnectionAsync();
+        TcpConnectionN10 client = new TcpConnectionN10();
         await client.OpenClient();
 
         //disconnect client first: 
@@ -125,7 +125,7 @@ public class TcpConnectionTest
         Assert.Equal(1, plNr);
 
         //connect with a new client
-        client = new TcpConnectionAsync();
+        client = new TcpConnectionN10();
         await client.OpenClient();
 
         //disconnect server first
@@ -138,6 +138,7 @@ public class TcpConnectionTest
 
         await server.Close();
         Assert.False(server.IsConnected);
+        await Task.Delay(10);
         Assert.False(client.IsConnected); //client gets disconnected too
 
         cd2.WaitForEvent();
@@ -159,7 +160,7 @@ public class TcpConnectionTest
     }
 
 
-        private void AssertEqual<TmsgData>(TcpConnectionAsync.Message? expected, TcpConnectionAsync.Message? actual)
+        private void AssertEqual<TmsgData>(MessageN10? expected, MessageN10? actual)
     {
         if (expected is null && actual is null)
             return;

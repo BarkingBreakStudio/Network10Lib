@@ -22,7 +22,7 @@ namespace Network10Lib.DemoWPF
     public partial class MainWindow : Window
     {
 
-        TcpConnectionAsync? connection;
+        TcpConnectionN10? connection;
 
         public MainWindow()
         {
@@ -42,13 +42,13 @@ namespace Network10Lib.DemoWPF
             {
                 cmd_OpenServer.IsEnabled = false;
                 cmd_OpenClient.IsEnabled = false;
-                connection = new TcpConnectionAsync { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
+                connection = new TcpConnectionN10 { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
                 connection.PlayerConnected += Connection_PlayerConnected;
                 connection.PlayerDisonnected += Connection_PlayerDisonnected;
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenServer(Ipadr, port);
+                await connection.OpenServer(port, Ipadr);
                 cmd_CloseServer.IsEnabled = true;
                 cmd_SendMessage.IsEnabled = true;
             }
@@ -82,11 +82,11 @@ namespace Network10Lib.DemoWPF
             {
                 cmd_OpenServer.IsEnabled = false;
                 cmd_OpenClient.IsEnabled = false;
-                connection = new TcpConnectionAsync { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
+                connection = new TcpConnectionN10 { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenClient(Ipadr, port);
+                await connection.OpenClient(port, Ipadr);
                 cmd_CloseClient.IsEnabled = true;
                 cmd_SendMessage.IsEnabled = true;
             }
@@ -170,7 +170,7 @@ namespace Network10Lib.DemoWPF
             listV_Players.Items.Add(playerNr);
         }
 
-        private void Connection_MessageReceived(TcpConnectionAsync.Message msg)
+        private void Connection_MessageReceived(MessageN10 msg)
         {
             if (!Dispatcher.CheckAccess()) { Dispatcher.Invoke(() => Connection_MessageReceived(msg)); return; }
 

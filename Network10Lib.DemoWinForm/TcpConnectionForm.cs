@@ -14,7 +14,7 @@ namespace Network10Lib.DemoWinForm
 {
     public partial class TcpConnectionForm : Form
     {
-        TcpConnectionAsync? connection;
+        TcpConnectionN10? connection;
 
         public TcpConnectionForm()
         {
@@ -32,13 +32,13 @@ namespace Network10Lib.DemoWinForm
             {
                 cmd_openServer.Enabled = false;
                 cmd_openClient.Enabled = false;
-                connection = new TcpConnectionAsync { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
+                connection = new TcpConnectionN10 { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
                 connection.PlayerConnected += Connection_PlayerConnected;
                 connection.PlayerDisonnected += Connection_PlayerDisonnected;
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenServer(Ipadr, port);
+                await connection.OpenServer(port, Ipadr);
                 cmd_CloseServer.Enabled = true;
                 cms_sendMessage.Enabled = true;
             }
@@ -73,13 +73,13 @@ namespace Network10Lib.DemoWinForm
             {
                 cmd_openServer.Enabled = false;
                 cmd_openClient.Enabled = false;
-                connection = new TcpConnectionAsync { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
+                connection = new TcpConnectionN10 { ServerConnectionId = txt_ServerIdentifier.Text, ClientConnectionId = txt_ClientIdentifier.Text };
                 connection.PlayerConnected += Connection_PlayerConnected;
                 connection.PlayerDisonnected += Connection_PlayerDisonnected;
                 connection.MessageReceived += Connection_MessageReceived;
                 connection.Connected += refreshStatus;
                 connection.Disonnected += refreshStatus;
-                await connection.OpenClient(Ipadr, port);
+                await connection.OpenClient(port, Ipadr);
                 cmd_closeClient.Enabled = true;
                 cms_sendMessage.Enabled = true;
             }
@@ -124,7 +124,7 @@ namespace Network10Lib.DemoWinForm
 
 
         //Connection events:
-        private void Connection_MessageReceived(TcpConnectionAsync.Message msg)
+        private void Connection_MessageReceived(MessageN10 msg)
         {
             if (InvokeRequired) { Invoke(() => Connection_MessageReceived(msg)); return; }
 

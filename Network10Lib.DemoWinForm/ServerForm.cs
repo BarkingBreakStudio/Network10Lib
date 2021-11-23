@@ -16,7 +16,7 @@ namespace Network10Lib.DemoWinForm
     public partial class ServerForm : Form
     {
 
-        TcpServerAsync? tcpServerAsync;
+        TcpServerN10? tcpServerAsync;
 
         public ServerForm()
         {
@@ -28,8 +28,8 @@ namespace Network10Lib.DemoWinForm
             if (tcpServerAsync is null)
             {
                 Log("Server starting ...");
-                tcpServerAsync = new TcpServerAsync();
-                tcpServerAsync.MessageReceived += TcpServerAsync_MessageReceived;
+                tcpServerAsync = new TcpServerN10();
+                tcpServerAsync.StringReceived += TcpServerAsync_MessageReceived;
                 tcpServerAsync.ClientConnected += TcpServerAsync_ClientConnected;
                 tcpServerAsync.ClientDisconnected += TcpServerAsync_ClientDisconnected;
                 await tcpServerAsync.Connect();
@@ -39,27 +39,27 @@ namespace Network10Lib.DemoWinForm
             else
             {
                 Log("Server stopping ...");
-                tcpServerAsync.MessageReceived -= TcpServerAsync_MessageReceived;
+                tcpServerAsync.StringReceived -= TcpServerAsync_MessageReceived;
                 tcpServerAsync.ClientConnected -= TcpServerAsync_ClientConnected;
                 tcpServerAsync.ClientDisconnected -= TcpServerAsync_ClientDisconnected;
-                await tcpServerAsync.Stop();
+                await tcpServerAsync.Disconnect();
                 tcpServerAsync = null;
                 Log("Server stopped");
                 cmd_serverStart.Text = "Start";
             }
         }
 
-        private void TcpServerAsync_ClientDisconnected(TcpServerAsync sender, int clientNr, TcpClient client)
+        private void TcpServerAsync_ClientDisconnected(TcpServerN10 sender, int clientNr)
         {
             Log($"Client disconnected: {clientNr}");
         }
 
-        private void TcpServerAsync_ClientConnected(TcpServerAsync sender, int clientNr, TcpClient client)
+        private void TcpServerAsync_ClientConnected(TcpServerN10 sender, int clientNr)
         {
             Log($"Client connected: {clientNr}");
         }
 
-        private void TcpServerAsync_MessageReceived(TcpServerAsync sender, int clientNr, TcpClient client, string message)
+        private void TcpServerAsync_MessageReceived(TcpServerN10 sender, int clientNr, string message)
         {
             Log($"Client: {clientNr} sent: {message}");
         }
@@ -112,7 +112,7 @@ namespace Network10Lib.DemoWinForm
         {
             if (tcpServerAsync is not null && int.TryParse(txt_clientNr.Text,out int clientNr))
             {
-                await tcpServerAsync.Write(clientNr, txt_send.Text);
+                await tcpServerAsync.WriteString(clientNr, txt_send.Text);
             }
         }
     }

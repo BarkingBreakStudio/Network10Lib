@@ -7,9 +7,21 @@ using System.Threading.Tasks;
 
 namespace Network10Lib
 {
+    /// <summary>
+    /// Internal extension functions
+    /// </summary>
     internal static class Extensions
     {
 
+        /// <summary>
+        /// Reads from Networkstream until requested read length is reached
+        /// </summary>
+        /// <param name="stream">Networkstream</param>
+        /// <param name="outBuffer">byte buffer with a minimal length of the requested read length</param>
+        /// <param name="length">requested read length</param>
+        /// <param name="cancellationToken">cancels this function</param>
+        /// <returns></returns>
+        /// <exception cref="OperationCanceledException"></exception>
         internal static async Task ReadUntilLengthAsync(this NetworkStream stream, byte[] outBuffer, int length, CancellationToken cancellationToken)
         {
             int nNewRead = 0;
@@ -23,7 +35,7 @@ namespace Network10Lib
         }
 
         /// <summary>
-        /// Waits as Wait() but unwraps Errors in case the thasks throws an error
+        /// Waits as Wait() but unwraps Errors in case the thask throws an error
         /// </summary>
         /// <param name="t">Task to wait for</param>
         internal static void WaitE(this Task t)
