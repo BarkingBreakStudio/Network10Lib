@@ -63,6 +63,7 @@ public class TcpClientN10 : ITcpConnectorN10
     TcpClient? client;
     CancellationTokenSource cts = new CancellationTokenSource();
     Task? tRead;
+    SemaphoreSlim writeSema = new SemaphoreSlim(1, 1);
 
     private static UTF8Encoding encoding = new UTF8Encoding();
 
@@ -107,11 +108,13 @@ public class TcpClientN10 : ITcpConnectorN10
 
     private async Task StartReadAsync(TcpClient client)
     {
-        await ReadAsync(client).ConfigureAwait(false);
+        await ReadAsync(client).ConfigureAwait(false); //this method only returns when client is disconnected
 
+        await writeSema.WaitAsync().ConfigureAwait(false); //make sure no one is accessing the client while we Dispose it.
         client.Close();
         client.Dispose();
-        this.client = null;
+        this.client = null; 
+        writeSema.Release();
         Disconnected?.Invoke(this);
     }
 
@@ -153,10 +156,7 @@ public class TcpClientN10 : ITcpConnectorN10
     {
         if (client is not null)
         {
-            string s = msg.Serialize();
-            byte[] buffer = encoding.GetBytes(s);
-            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
-            await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            await WriteString(msg.Serialize()).ConfigureAwait(false); //write json string of message
         }
     }
 
@@ -169,9 +169,7 @@ public class TcpClientN10 : ITcpConnectorN10
     {
         if (client is not null)
         {
-            byte[] buffer = encoding.GetBytes(text);
-            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
-            await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            await WriteBytes(encoding.GetBytes(text)).ConfigureAwait(false);
         }
     }
 
@@ -182,10 +180,18 @@ public class TcpClientN10 : ITcpConnectorN10
     /// <returns>awaitable Task</returns>
     public async Task WriteBytes(byte[] buffer)
     {
-        if (client is not null)
+        await writeSema.WaitAsync().ConfigureAwait(false);
+        try
         {
-            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
-            await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            if (client is not null)
+            {
+                await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+                await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            writeSema.Release();
         }
     }
 

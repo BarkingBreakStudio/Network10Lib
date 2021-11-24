@@ -76,10 +76,60 @@ public class TcpServerN10 : ITcpConnectorN10
     CancellationTokenSource cts = new CancellationTokenSource();
     Task? tListen;
     List<Task> clientTasks = new List<Task>();
-    List<TcpClient> clients = new List<TcpClient>();
+    List<Client> clients = new List<Client>();
+    List<SemaphoreSlim> writeSemas = new List<SemaphoreSlim>();
     private static UTF8Encoding encoding = new UTF8Encoding();
+    SemaphoreSlim writeSema = new SemaphoreSlim(1, 1);
 
+    public class Client
+    {
+        private TcpClient? tcp;
+        private SemaphoreSlim sema = new SemaphoreSlim(1, 1);
 
+        public Client(TcpClient tcp)
+        {
+            this.tcp = tcp;
+        }
+
+        public NetworkStream? GetStream()
+        {
+            return tcp?.GetStream();
+        }
+
+        public async Task WriteAsync(byte[] buffer)
+        {
+            await sema.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (tcp is not null)
+                {
+                    await tcp.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
+                    await tcp.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                sema.Release();
+            }
+        }
+
+        public async Task ReadUntilLengthAsync(byte[] outBuffer, int length, CancellationToken cancellationToken)
+        {
+            if (tcp is not null)
+            {
+                await tcp.GetStream().ReadUntilLengthAsync(outBuffer, length, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        public async Task DisposeAsync()
+        {
+            await sema.WaitAsync().ConfigureAwait(false);
+            tcp?.Close();
+            tcp?.Dispose();
+            tcp = null;
+            sema.Release();
+        }
+    }
 
     public TcpServerN10()
     {
@@ -115,9 +165,10 @@ public class TcpServerN10 : ITcpConnectorN10
             {
                 TcpClient client = await tcpListener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
                 int clientNr = clientTasks.Count;
-                ClientConnected?.Invoke(this, clientNr);
-                clients.Add(client);
-                clientTasks.Add(TaskLongRunning.Run(() => ReadClientData(client, clientNr).WaitE()));
+                Client newClient = new Client(client);
+                clients.Add(newClient);
+                ClientConnected?.Invoke(this, clientNr);     
+                clientTasks.Add(TaskLongRunning.Run(() => ReadClientData(newClient, clientNr).WaitE()));
             }
         }
         catch (OperationCanceledException) { }
@@ -127,20 +178,20 @@ public class TcpServerN10 : ITcpConnectorN10
         }
     }
 
-    private async Task ReadClientData(TcpClient client, int clientNr)
+    private async Task ReadClientData(Client client, int clientNr)
     {
         byte[] buffer = new byte[1024];
         try
         {
             while (true)
             {
-                await client.GetStream().ReadUntilLengthAsync(buffer, 4, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
+                await client.ReadUntilLengthAsync(buffer, 4, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
                 int dataLength = BitConverter.ToInt32(buffer);
                 if (buffer.Length < dataLength)
                 {
                     buffer = new byte[dataLength];
                 }
-                await client.GetStream().ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
+                await client.ReadUntilLengthAsync(buffer, dataLength, cts.Token).ConfigureAwait(false); //throws OperationCanceledException
                 string recvString = encoding.GetString(buffer, 0, dataLength);
                 BytesReceived?.Invoke(this, clientNr, buffer, dataLength);
                 StringReceived?.Invoke(this, clientNr, recvString);
@@ -155,8 +206,7 @@ public class TcpServerN10 : ITcpConnectorN10
         finally
         {
             ClientDisconnected?.Invoke(this, clientNr);
-            client.Close();
-            client.Dispose();
+            await client.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -170,9 +220,7 @@ public class TcpServerN10 : ITcpConnectorN10
     {
         if (clientNr < clients.Count)
         {
-            byte[] buffer = encoding.GetBytes(text);
-            await clients[clientNr].GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
-            await clients[clientNr].GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            await WriteBytes(clientNr, encoding.GetBytes(text)).ConfigureAwait(false);
         }
     }
 
@@ -186,8 +234,7 @@ public class TcpServerN10 : ITcpConnectorN10
     {
         if (clientNr < clients.Count)
         {
-            await clients[clientNr].GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
-            await clients[clientNr].GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            await clients[clientNr].WriteAsync(buffer).ConfigureAwait(false);
         }
     }
 
@@ -199,7 +246,7 @@ public class TcpServerN10 : ITcpConnectorN10
     /// <exception cref="InvalidOperationException">msg.Receiver invalid</exception>
     public async Task SendMessage(MessageN10 msg)
     {
-        if(msg.Receiver == 0)
+        if(msg.Receiver == 0) //the message was for this server
         {
             string jsonSer = msg.Serialize();
             var msgDes = MessageN10.TryDeserialize(jsonSer);
@@ -210,10 +257,7 @@ public class TcpServerN10 : ITcpConnectorN10
         }
         else if (msg.Receiver <= clients.Count)
         {
-            TcpClient client = clients[msg.Receiver - 1];
-            byte[] buffer = encoding.GetBytes(msg.Serialize());
-            await client.GetStream().WriteAsync(BitConverter.GetBytes(buffer.Length)).ConfigureAwait(false);
-            await client.GetStream().WriteAsync(buffer).ConfigureAwait(false);
+            await WriteString(msg.Receiver-1, msg.Serialize()).ConfigureAwait(false); //Receiver is the player number, we have to substract 1 to get the client number
         }
         else
         {
