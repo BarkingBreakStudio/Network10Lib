@@ -228,6 +228,40 @@ public class TcpConnectionTest
             await client2.Close();
             await server.Close();
         }
+
+
+        {//try to send from client to itself, other client and server with AllowClient2ClientMessaging deactivated
+
+            //create server and client
+            TcpConnectionN10 server = new TcpConnectionN10() {AllowClient2ClientMessaging = false };
+            await server.OpenServer();
+
+            TcpConnectionN10 client1 = new TcpConnectionN10();
+            await client1.OpenClient();
+
+            TcpConnectionN10 client2 = new TcpConnectionN10();
+            await client2.OpenClient();
+
+            var gofcS = new GetEventParam<MessageN10>();
+            var gofcC1 = new GetEventParam<MessageN10>();
+            var gofcC2 = new GetEventParam<MessageN10>();
+            server.MessageReceived += gofcS.Callback;
+            client1.MessageReceived += gofcC1.Callback;
+            client2.MessageReceived += gofcC2.Callback;
+            Person p = new Person { Name = "Nakuna", Address = "Matata", City = "Regenwald", Age = 5 };
+            await client1.SendObject(p, new int[] { 0, 1, 2 });
+
+            AssertEqual<Person>(new MessageN10 { Sender = 1, Receiver = 0, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcS.WaitForEvent());
+            Assert.Null(gofcC1.WaitForEvent(false)); //client to client communication should fail
+            Assert.Null(gofcC2.WaitForEvent(false)); //client to client communication should fail
+            server.MessageReceived -= gofcS.Callback;
+            client1.MessageReceived -= gofcC1.Callback;
+            client2.MessageReceived -= gofcC2.Callback;
+
+            await client1.Close();
+            await client2.Close();
+            await server.Close();
+        }
     }
 
 
@@ -328,7 +362,14 @@ public class TcpConnectionTest
         {
             Assert.Equal(shouldSucceed, are.WaitOne(msTimeout));
             onEnd?.Invoke();
-            return objs[0];
+            if (objs.Count > 0)
+            {
+                return objs[0];
+            }
+            else
+            {
+                return default(T);
+            }
         }
 
         public List<T?> WaitForEvents(bool shouldSucceed = true, int msTimeout = 1000)

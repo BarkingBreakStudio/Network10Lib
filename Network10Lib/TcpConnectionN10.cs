@@ -75,6 +75,11 @@ namespace Network10Lib
         /// </summary>
         public event DisconnectedHandler? Disonnected;
 
+        /// <summary>
+        /// Set to false if you dont trust clients. If enabled, clients can communicate with each other without the server knowing it.
+        /// </summary>
+        public bool AllowClient2ClientMessaging = true;
+
         //inertnal events
         private delegate void ServerHandshakeResponseHandler(bool success);
         private event Action<bool>? ServerHandshakeResponsed;
@@ -347,7 +352,7 @@ namespace Network10Lib
                         {
                             MessageReceived?.Invoke(msg);
                         }
-                        else //this message is for a different client
+                        else if (AllowClient2ClientMessaging) //this message is for a different client. Send it to different client if allowed
                         {
                             connector?.SendMessage(msg).WaitE(); //important to wait here for thread safety
                         }
