@@ -88,6 +88,16 @@ namespace Network10Lib
             }
         }
 
+        /// <summary>
+        /// clone message efficiently if you want to send the same message to a different client
+        /// </summary>
+        /// <param name="otherReceiver">received of the clones message</param>
+        /// <returns>cloned message</returns>
+        public MessageN10 Clone4otherReceiver(int otherReceiver)
+        {
+            return new MessageN10 { Sender = Sender, Receiver = otherReceiver, MsgType = MsgType, dataJson = dataJson };
+        }
+
         public override string ToString()
         {
             return $"Message{{ Sender: {Sender}, Receiver: { Receiver}, MsgType: { MsgType } Data: { dataJson }  }}";

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -273,11 +274,10 @@ namespace Network10Lib
 
             ServerHandshakeResponsed += eventCatcher;
 
-            if (connector is not null)
-            {
-                MessageN10 msg = new MessageN10 { Sender = -1, Receiver = 0, MsgType = MessageN10.EnumMsgType.ClientHandshake, Data = ClientConnectionId };
-                await connector.SendMessage(msg).ConfigureAwait(false);
-            }
+
+            MessageN10 msg = new MessageN10 { Sender = -1, Receiver = 0, MsgType = MessageN10.EnumMsgType.ClientHandshake, Data = ClientConnectionId };
+            await (connector?.SendMessage(msg).ConfigureAwait(false) ?? Task.CompletedTask.ConfigureAwait(false));
+            
 
             arw.WaitOne(1000);
             ServerHandshakeResponsed -= eventCatcher;
@@ -289,7 +289,7 @@ namespace Network10Lib
         }
 
         /// <summary>
-        /// Sends a message with obj as ist content.
+        /// Sends a message with obj as its content to one player.
         /// </summary>
         /// <param name="obj">An object which will be converted to a json string and send over the tcp connection</param>
         /// <param name="playerNr">Player number which this message wil be sent to</param>
@@ -299,6 +299,27 @@ namespace Network10Lib
             if(IsConnected && connector is not null)
             {
                 await connector.SendMessage(new MessageN10 { Sender = myAdr, Receiver = playerNr, MsgType = MessageN10.EnumMsgType.Tcp, Data = obj }).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        ///  Sends a message with obj as its content to multiple players.
+        /// </summary>
+        /// <param name="obj">An object which will be converted to a json string and send over the tcp connection</param>
+        /// <param name="playerNrs">list of players</param>
+        /// <returns></returns>
+        public async Task SendObject(object obj, IEnumerable<int> playerNrs)
+        {
+            if (IsConnected)
+            {
+                List<Task> sendTasks = new List<Task>();
+                MessageN10 msg = new MessageN10 { Sender = myAdr, Receiver = -1, MsgType = MessageN10.EnumMsgType.Tcp, Data = obj };
+
+                foreach (var playerNr in playerNrs)
+                {
+                    sendTasks.Add(connector?.SendMessage(msg.Clone4otherReceiver(playerNr)) ?? Task.CompletedTask);
+                }
+                await Task.WhenAll(sendTasks).ConfigureAwait(false);
             }
         }
 

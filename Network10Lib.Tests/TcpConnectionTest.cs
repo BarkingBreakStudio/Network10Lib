@@ -161,6 +161,77 @@ public class TcpConnectionTest
 
 
     [Fact]
+    public async void TcpConnector_SendToMultiplePlayers()
+    {
+        {
+            //create server and client
+            TcpConnectionN10 server = new TcpConnectionN10();
+            await server.OpenServer();
+
+            TcpConnectionN10 client1 = new TcpConnectionN10();
+            await client1.OpenClient();
+
+            TcpConnectionN10 client2 = new TcpConnectionN10();
+            await client2.OpenClient();
+
+            //send from server to itself and both clients
+            var gofcS = new GetEventParam<MessageN10>();
+            var gofcC1 = new GetEventParam<MessageN10>();
+            var gofcC2 = new GetEventParam<MessageN10>();
+            server.MessageReceived += gofcS.Callback;
+            client1.MessageReceived += gofcC1.Callback;
+            client2.MessageReceived += gofcC2.Callback;
+            Person p = new Person { Name = "Nakuna", Address = "Matata", City = "Regenwald", Age = 5 };
+            await server.SendObject(p, new int[] { 0, 1, 2 });
+
+            AssertEqual<Person>(new MessageN10 { Sender = 0, Receiver = 0, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcS.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 0, Receiver = 1, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcC1.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 0, Receiver = 2, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcC2.WaitForEvent());
+            server.MessageReceived -= gofcS.Callback;
+            client1.MessageReceived -= gofcC1.Callback;
+            client2.MessageReceived -= gofcC2.Callback;
+
+            await client1.Close();
+            await client2.Close();
+            await server.Close();
+        }
+
+        {//send from client to itself, other client and server
+
+            //create server and client
+            TcpConnectionN10 server = new TcpConnectionN10();
+            await server.OpenServer();
+
+            TcpConnectionN10 client1 = new TcpConnectionN10();
+            await client1.OpenClient();
+
+            TcpConnectionN10 client2 = new TcpConnectionN10();
+            await client2.OpenClient();
+
+            var gofcS = new GetEventParam<MessageN10>();
+            var gofcC1 = new GetEventParam<MessageN10>();
+            var gofcC2 = new GetEventParam<MessageN10>();
+            server.MessageReceived += gofcS.Callback;
+            client1.MessageReceived += gofcC1.Callback;
+            client2.MessageReceived += gofcC2.Callback;
+            Person p = new Person { Name = "Nakuna", Address = "Matata", City = "Regenwald", Age = 5 };
+            await client1.SendObject(p, new int[] { 0, 1, 2 });
+
+            AssertEqual<Person>(new MessageN10 { Sender = 1, Receiver = 0, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcS.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 1, Receiver = 1, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcC1.WaitForEvent());
+            AssertEqual<Person>(new MessageN10 { Sender = 1, Receiver = 2, MsgType = MessageN10.EnumMsgType.Tcp, Data = p }, gofcC2.WaitForEvent());
+            server.MessageReceived -= gofcS.Callback;
+            client1.MessageReceived -= gofcC1.Callback;
+            client2.MessageReceived -= gofcC2.Callback;
+
+            await client1.Close();
+            await client2.Close();
+            await server.Close();
+        }
+    }
+
+
+    [Fact]
     public async void TcpConnector_WrongHandshakeTest()
     {
         {
