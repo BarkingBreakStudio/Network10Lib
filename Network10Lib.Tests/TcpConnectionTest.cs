@@ -224,7 +224,7 @@ public class TcpConnectionTest
             Assert.Equal(expected.Sender, actual.Sender);
             Assert.Equal(expected.Receiver, actual.Receiver);
             Assert.Equal(expected.MsgType, actual.MsgType);
-            Assert.Equal(expected.Data, actual.DeserializeData<TmsgData>());
+            Assert.Equal(expected.DeserializeData<TmsgData>(), actual.DeserializeData<TmsgData>());
         }
     }
 

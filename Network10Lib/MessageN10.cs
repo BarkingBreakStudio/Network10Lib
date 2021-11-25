@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Network10Lib
 {
@@ -13,21 +14,51 @@ namespace Network10Lib
         public enum EnumMsgType
         {
             Tcp,
-            Health,
             ClientHandshake,
             ServerHandshake,
         }
 
+        /// <summary>
+        /// Player number of the sender of this message
+        /// </summary>
         public int Sender { get; set; }
+        /// <summary>
+        /// Player number of the receiver of this message
+        /// </summary>
         public int Receiver { get; set; }
+        /// <summary>
+        /// only Tcp is valid for ex ternal messages
+        /// </summary>
         public EnumMsgType MsgType { get; set; }
-        public object Data { get; set; } = "";
+        /// <summary>
+        /// Json converted object to transfer
+        /// </summary>
+        [JsonInclude]
+        public string dataJson {get;private set; } = "";
 
+        /// <summary>
+        /// Data which should be transferred
+        /// </summary>
+        [JsonIgnore]
+        public object Data
+        {
+            set { dataJson = JsonSerializer.Serialize(value, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }); }
+        }
+
+        /// <summary>
+        /// Serialize the whole message object
+        /// </summary>
+        /// <returns></returns>
         public string Serialize()
         {
             return JsonSerializer.Serialize(this, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
+        /// <summary>
+        /// Deserialize JSON string of a message
+        /// </summary>
+        /// <param name="s">JSON string of a message</param>
+        /// <returns></returns>
         public static MessageN10? TryDeserialize(string s)
         {
             try
@@ -40,11 +71,16 @@ namespace Network10Lib
             }
         }
 
+        /// <summary>
+        /// Deserialize the tranferred data
+        /// </summary>
+        /// <typeparam name="T">type of tranferred data</typeparam>
+        /// <returns>deserialized data or null on fail</returns>
         public T? DeserializeData<T>()
         {
-            if (Data is not null)
+            if (dataJson is not null)
             {
-                return JsonSerializer.Deserialize<T>((JsonElement)Data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                return JsonSerializer.Deserialize<T>(dataJson, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             }
             else
             {
@@ -54,8 +90,7 @@ namespace Network10Lib
 
         public override string ToString()
         {
-            //T? data = DeserializeData<T>();
-            return $"Message{{ Sender: {Sender}, Receiver: { Receiver}, MsgType: { MsgType } Data: { Data.ToString() }  }}";
+            return $"Message{{ Sender: {Sender}, Receiver: { Receiver}, MsgType: { MsgType } Data: { dataJson }  }}";
         }
 
     }

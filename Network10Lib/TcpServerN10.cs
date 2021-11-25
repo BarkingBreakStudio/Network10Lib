@@ -216,12 +216,9 @@ public class TcpServerN10 : ITcpConnectorN10
     /// <param name="clientNr">client id</param>
     /// <param name="text">send string to client</param>
     /// <returns></returns>
-    public async Task WriteString(int clientNr,string text)
+    public async Task WriteString(int clientNr, string text)
     {
-        if (clientNr < clients.Count)
-        {
-            await WriteBytes(clientNr, encoding.GetBytes(text)).ConfigureAwait(false);
-        }
+        await WriteBytes(clientNr, encoding.GetBytes(text)).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -243,7 +240,6 @@ public class TcpServerN10 : ITcpConnectorN10
     /// </summary>
     /// <param name="msg">message will be sent to msg.Receiver</param>
     /// <returns>awaitable task</returns>
-    /// <exception cref="InvalidOperationException">msg.Receiver invalid</exception>
     public async Task SendMessage(MessageN10 msg)
     {
         if(msg.Receiver == 0) //the message was for this server
@@ -255,13 +251,9 @@ public class TcpServerN10 : ITcpConnectorN10
                 MessageReceived?.Invoke(this, msgDes, -1);
             }
         }
-        else if (msg.Receiver <= clients.Count)
-        {
-            await WriteString(msg.Receiver-1, msg.Serialize()).ConfigureAwait(false); //Receiver is the player number, we have to substract 1 to get the client number
-        }
         else
         {
-            throw new InvalidOperationException();
+            await WriteString(msg.Receiver-1, msg.Serialize()).ConfigureAwait(false); //Receiver is the player number, we have to substract 1 to get the client number
         }
     }
 

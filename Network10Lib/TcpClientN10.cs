@@ -154,10 +154,8 @@ public class TcpClientN10 : ITcpConnectorN10
     /// <returns>awaitable Task</returns>
     public async Task SendMessage(MessageN10 msg)
     {
-        if (client is not null)
-        {
-            await WriteString(msg.Serialize()).ConfigureAwait(false); //write json string of message
-        }
+        string s = msg.Serialize();
+        await WriteString(s).ConfigureAwait(false); //write json string of message
     }
 
     /// <summary>
@@ -167,10 +165,7 @@ public class TcpClientN10 : ITcpConnectorN10
     /// <returns>awaitable Task</returns>
     public async Task WriteString(string text)
     {
-        if (client is not null)
-        {
-            await WriteBytes(encoding.GetBytes(text)).ConfigureAwait(false);
-        }
+        await WriteBytes(encoding.GetBytes(text)).ConfigureAwait(false);
     }
 
     /// <summary>
