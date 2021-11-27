@@ -18,5 +18,6 @@ There are two demo Projects: One with Windows Froms and one with WPF. Use those 
 ## Getting Started
 
 1. Install Visual Studio 2022
-2. Set one of the demo projects as startup project
-3. Hit play
+2. Open Solution, VS2022 will install all required packages automatically
+3. Set one of the demo projects as startup project
+4. Hit play
