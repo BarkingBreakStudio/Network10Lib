@@ -12,7 +12,8 @@ C# provides a TcpClient class as well as TcpListener for tcp communication. This
 There are two demo Projects: One with Windows Froms and one with WPF. Use those Project as a Guidline for your Project.
 
 ## UML Class Diagram
-Todo: include image
+
+<img src="./Images/ClassDiagram.svg">
 
 ## Getting Started
 
